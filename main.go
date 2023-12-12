@@ -1,13 +1,14 @@
 package main
 
-import "gofr.dev/pkg/gofr"
+import (
+	"github.com/DevanshBatra20-PasswordManager/handlers"
+	"gofr.dev/pkg/gofr"
+)
 
 func main() {
 	app := gofr.New()
-	app.GET("/greet", func(ctx *gofr.Context) (interface{}, error) {
 
-		return "Hello World!", nil
-	})
+	handlers.AuthHandler(app)
 
 	app.Start()
 }
