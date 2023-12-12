@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"github.com/DevanshBatra20-PasswordManager/exception"
 	"github.com/DevanshBatra20-PasswordManager/helpers"
 	"github.com/DevanshBatra20-PasswordManager/models"
 	"gofr.dev/pkg/gofr"
@@ -30,4 +31,32 @@ func Signup(c *gofr.Context, user *models.User) (string, error) {
 		return "", err
 	}
 	return "Signup completed", nil
+}
+
+func Login(c *gofr.Context, userCredentials *models.Login) (*models.Signup, error) {
+	var foundUser models.Signup
+
+	err := c.DB().QueryRowContext(c, "SELECT * FROM users WHERE email=(?)", userCredentials.Email).
+		Scan(&foundUser.ID, &foundUser.First_Name, &foundUser.Last_Name,
+			&foundUser.Phone, &foundUser.Email, &foundUser.Token, &foundUser.Password)
+	if err != nil {
+		return &models.Signup{}, exception.UserNotFound{Email: *userCredentials.Email}
+	}
+
+	isPasswordValid := helpers.VerifyPassword(*foundUser.Password, *userCredentials.Password)
+	if !isPasswordValid {
+		return &models.Signup{}, exception.InvalidCredentials{
+			Password: *userCredentials.Password,
+			Email:    *userCredentials.Email,
+		}
+	}
+
+	token, _ := helpers.GenerateJwtToken(*foundUser.Email, *foundUser.First_Name, *foundUser.Last_Name)
+	_, err = c.DB().ExecContext(c, "UPDATE users SET token=(?) WHERE email=(?)",
+		token, foundUser.Email)
+	if err != nil {
+		return &models.Signup{}, err
+	}
+
+	return &foundUser, nil
 }
