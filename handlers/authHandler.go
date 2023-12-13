@@ -7,31 +7,40 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
-func AuthHandler(incomingRequests *gofr.Gofr) {
-	incomingRequests.POST("/api/users/signup", func(c *gofr.Context) (interface{}, error) {
-		var user models.User
+type authHandler struct {
+	authDatastore datastore.Auth
+}
 
-		if err := c.Bind(&user); err != nil {
-			c.Logger.Errorf("Error in binding user: %v", err)
-			return nil, errors.InvalidParam{Param: []string{"user"}}
-		}
-		resp, err := datastore.Signup(c, &user)
-		if err != nil {
-			return nil, err
-		}
-		return resp, nil
-	})
-	incomingRequests.POST("/api/users/login", func(c *gofr.Context) (interface{}, error) {
-		var userCredentials models.Login
+func NewAuth(a datastore.Auth) authHandler {
+	return authHandler{authDatastore: a}
+}
 
-		if err := c.Bind(&userCredentials); err != nil {
-			c.Logger.Errorf("Error in binding user: %v", err)
-			return nil, errors.InvalidParam{Param: []string{"user"}}
-		}
-		resp, err := datastore.Login(c, &userCredentials)
-		if err != nil {
-			return nil, err
-		}
-		return resp, nil
-	})
+func (a authHandler) Signup(ctx *gofr.Context) (interface{}, error) {
+	var user models.User
+
+	if err := ctx.Bind(&user); err != nil {
+		ctx.Logger.Errorf("Error in binding user: %v", err)
+		return nil, errors.InvalidParam{Param: []string{"user"}}
+	}
+	resp, err := a.authDatastore.Signup(ctx, &user)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+func (a authHandler) Login(ctx *gofr.Context) (interface{}, error) {
+	var userCredentials models.Login
+
+	if err := ctx.Bind(&userCredentials); err != nil {
+		ctx.Logger.Errorf("Error in binding user: %v", err)
+		return nil, errors.InvalidParam{Param: []string{"user"}}
+	}
+	resp, err := a.authDatastore.Login(ctx, &userCredentials)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
