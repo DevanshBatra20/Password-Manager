@@ -36,3 +36,24 @@ func (u userHandler) GetById(ctx *gofr.Context) (interface{}, error) {
 
 	return resp, nil
 }
+
+func (u userHandler) DeleteById(ctx *gofr.Context) (interface{}, error) {
+	userId := ctx.PathParam("userId")
+	if userId == "" {
+		return nil, errors.MissingParam{Param: []string{"userId"}}
+	}
+
+	if _, err := helpers.ValidateId(userId); err != nil {
+		return nil, errors.InvalidParam{Param: []string{"userId"}}
+	}
+
+	resp, err := u.userStore.DeleteById(ctx, userId)
+	if err != nil {
+		return nil, errors.EntityNotFound{
+			Entity: "User",
+			ID:     userId,
+		}
+	}
+
+	return resp, nil
+}

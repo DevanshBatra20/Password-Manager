@@ -19,5 +19,6 @@ func main() {
 	app.POST("/users/signup", authHandler.Signup)
 	app.POST("/users/login", authHandler.Login)
 	app.GET("/users/{userId}", middlewares.JWTAuth(userHandler.GetById))
+	app.DELETE("/users/deleteUser/{userId}", middlewares.JWTAuth(userHandler.DeleteById))
 	app.Start()
 }

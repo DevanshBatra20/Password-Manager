@@ -28,3 +28,15 @@ func (u *user) GetById(ctx *gofr.Context, userId string) (*models.User, error) {
 		return &models.User{}, err
 	}
 }
+
+func (u *user) DeleteById(ctx *gofr.Context, userId string) (string, error) {
+	_, err := ctx.DB().ExecContext(ctx, "DELETE FROM users WHERE id = (?)", userId)
+	switch err {
+	case sql.ErrNoRows:
+		return "Error in deleting user", errors.EntityNotFound{Entity: "User", ID: userId}
+	case nil:
+		return "User deleted successfully", nil
+	default:
+		return "Error in deleteing user", err
+	}
+}
