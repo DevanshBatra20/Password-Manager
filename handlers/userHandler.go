@@ -15,9 +15,8 @@ func NewUser(u datastore.User) userHandler {
 	return userHandler{userStore: u}
 }
 
-func (u userHandler) GetById(ctx *gofr.Context) (interface{}, error) {
+func (u userHandler) GetById(ctx *gofr.Context, userId string) (interface{}, error) {
 
-	userId := ctx.PathParam("userId")
 	if userId == "" {
 		return nil, errors.MissingParam{Param: []string{"userId"}}
 	}
