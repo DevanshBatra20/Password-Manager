@@ -89,3 +89,48 @@ func Test_Get(t *testing.T) {
 		})
 	}
 }
+
+func Test_Delete(t *testing.T) {
+	var first_name string = "Devansh"
+	var last_name string = "Batra"
+	var phone string = "1234567890"
+	var email string = "devanshbatra15@gmail.com"
+	var password string = "1234567890"
+
+	mockLogger, mockStore := newMock(t)
+	h := handlers.NewUser(mockStore)
+	user := models.User{
+		ID:         "1",
+		First_Name: &first_name,
+		Last_Name:  &last_name,
+		Phone:      &phone,
+		Email:      &email,
+		Password:   &password,
+	}
+
+	testCases := []struct {
+		desc      string
+		input     interface{}
+		mockCalls []*gomock.Call
+		expRes    interface{}
+		expErr    error
+	}{
+		{"Success case", user, []*gomock.Call{
+			mockStore.EXPECT().DeleteById(gomock.AssignableToTypeOf(&gofr.Context{}), user.ID).Return("Sucess", nil),
+		}, "Sucess", nil},
+		{
+			"Failure case", user, []*gomock.Call{
+				mockStore.EXPECT().DeleteById(gomock.AssignableToTypeOf(&gofr.Context{}), user.ID).Return("Error", errors.EntityNotFound{Entity: "User", ID: user.ID}),
+			}, "Error", errors.EntityNotFound{Entity: "User", ID: user.ID}},
+	}
+
+	for i, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			ctx := createContext(http.MethodDelete, map[string]string{"id": fmt.Sprint(user.ID)}, tc.input, mockLogger, t)
+			res, err := h.DeleteById(ctx, user.ID)
+
+			assert.Equal(t, tc.expRes, res, "Test [%d] failed", i+1)
+			assert.Equal(t, tc.expErr, err, "Test [%d] failed", i+1)
+		})
+	}
+}

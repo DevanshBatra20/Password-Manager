@@ -36,8 +36,8 @@ func (u userHandler) GetById(ctx *gofr.Context, userId string) (interface{}, err
 	return resp, nil
 }
 
-func (u userHandler) DeleteById(ctx *gofr.Context) (interface{}, error) {
-	userId := ctx.PathParam("userId")
+func (u userHandler) DeleteById(ctx *gofr.Context, userId string) (interface{}, error) {
+
 	if userId == "" {
 		return nil, errors.MissingParam{Param: []string{"userId"}}
 	}
