@@ -21,7 +21,7 @@ func main() {
 
 	app.POST("/users/signup", authHandler.Signup)
 	app.POST("/users/login", authHandler.Login)
-	app.GET("/users/{userId}", middlewares.JWTAuth(func(ctx *gofr.Context) (interface{}, error) {
+	app.GET("/users/getUser/{userId}", middlewares.JWTAuth(func(ctx *gofr.Context) (interface{}, error) {
 		return userHandler.GetById(ctx, ctx.PathParam("userId"))
 	}))
 	app.DELETE("/users/deleteUser/{userId}", middlewares.JWTAuth(func(ctx *gofr.Context) (interface{}, error) {
