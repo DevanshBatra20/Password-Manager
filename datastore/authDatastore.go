@@ -13,31 +13,31 @@ func NewAuth() *auth {
 	return &auth{}
 }
 
-func (a *auth) Signup(ctx *gofr.Context, user *models.User) (*models.User, error) {
+func (a *auth) Signup(ctx *gofr.Context, user *models.User) (string, error) {
 	var count int
 	err := ctx.DB().QueryRowContext(ctx, "SELECT COUNT(*) FROM users WHERE email=(?) || phone=(?)",
 		user.Email, user.Phone).Scan(&count)
 	if err != nil {
-		return &models.User{}, err
+		return "Error in signing up", err
 	}
 	if count > 0 {
-		return &models.User{}, exception.UserAlreadyExists{Email: *user.Email, Phone: *user.Phone}
+		return "Error in signing up", exception.UserAlreadyExists{Email: *user.Email, Phone: *user.Phone}
 	}
 	token, err := helpers.GenerateJwtToken(*user.Email, *user.First_Name, *user.Last_Name)
 	if err != nil {
-		return &models.User{}, err
+		return "Error in signing up", err
 	}
 	hashPassword, err := helpers.HashPassword(*user.Password)
 	if err != nil {
-		return &models.User{}, err
+		return "Error in signing up", err
 	}
 	_, err = ctx.DB().ExecContext(ctx, "INSERT INTO users (first_name, last_name, phone, email, token, password) VALUES(?, ?, ?, ?, ?, ?)",
 		user.First_Name, user.Last_Name, user.Phone, user.Email, token, hashPassword)
 	if err != nil {
-		return &models.User{}, err
+		return "Error in signing up", err
 	}
 
-	return user, nil
+	return "Signed up sucessfully", nil
 }
 
 func (a *auth) Login(ctx *gofr.Context, userCredentials *models.Login) (*models.Signup, error) {

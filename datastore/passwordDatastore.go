@@ -14,24 +14,24 @@ func NewPassword() *password {
 	return &password{}
 }
 
-func (p *password) Create(ctx *gofr.Context, password *models.Password, userId string) (*models.Password, error) {
+func (p *password) Create(ctx *gofr.Context, password *models.Password, userId string) (string, error) {
 	var firstName string
 	_ = ctx.DB().QueryRowContext(ctx, "SELECT (First_Name) FROM users WHERE id = (?)", userId).Scan(&firstName)
 	if firstName == "" {
-		return &models.Password{}, errors.New("User with userId " + userId + " does not exist")
+		return "", errors.New("User with userId " + userId + " does not exist")
 	}
 
 	encryptedPassword, err := helpers.EncryptAES(password.Password_Value)
 	if err != nil {
-		return &models.Password{}, nil
+		return "Error in encrypting password", nil
 	}
 	_, err = ctx.DB().ExecContext(ctx, "INSERT INTO passwords (password_name, password_value, password_type, user_id) VALUES (?, ?, ?, ?)",
 		password.Password_Name, encryptedPassword, password.Password_Type, userId)
 	if err != nil {
-		return &models.Password{}, err
+		return "Error in creating password", err
 	}
 
-	return password, nil
+	return "Password created sucessfully", nil
 }
 
 func (p *password) Delete(ctx *gofr.Context, passwordId string) (string, error) {

@@ -22,7 +22,7 @@ import (
 	gofrLog "gofr.dev/pkg/log"
 )
 
-func newMock(t *testing.T) (gofrLog.Logger, *datastore.MockUser) {
+func newUserMock(t *testing.T) (gofrLog.Logger, *datastore.MockUser) {
 	ctrl := gomock.NewController(t)
 
 	defer ctrl.Finish()
@@ -53,7 +53,7 @@ func Test_Get(t *testing.T) {
 	var email string = "devanshbatra15@gmail.com"
 	var password string = "1234567890"
 
-	mocklogger, mockStore := newMock(t)
+	mocklogger, mockStore := newUserMock(t)
 	h := handlers.NewUser(mockStore)
 	user := models.User{
 		ID:         "1",
@@ -97,7 +97,7 @@ func Test_Delete(t *testing.T) {
 	var email string = "devanshbatra15@gmail.com"
 	var password string = "1234567890"
 
-	mockLogger, mockStore := newMock(t)
+	mockLogger, mockStore := newUserMock(t)
 	h := handlers.NewUser(mockStore)
 	user := models.User{
 		ID:         "1",

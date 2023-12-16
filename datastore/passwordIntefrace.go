@@ -6,7 +6,7 @@ import (
 )
 
 type Password interface {
-	Create(ctx *gofr.Context, password *models.Password, userId string) (*models.Password, error)
+	Create(ctx *gofr.Context, password *models.Password, userId string) (string, error)
 	Delete(ctx *gofr.Context, passwordId string) (string, error)
 	Update(ctx *gofr.Context, password *models.Password, passwordId string) (string, error)
 	Get(ctx *gofr.Context, passwordId string) (*models.Password, error)
